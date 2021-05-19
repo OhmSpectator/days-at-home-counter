@@ -1,6 +1,6 @@
 import datetime
 
-days_allowed_for_window_year = 183
+days_allowed_for_window_year = 182
 
 
 class DateInterval(object):
