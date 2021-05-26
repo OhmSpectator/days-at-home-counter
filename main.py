@@ -1,13 +1,26 @@
 import datetime
 
 from flask import Flask
+from flask import request
 
 days_allowed_for_window_year = 182
 
 app = Flask(__name__)
 
+calendar_form = """
+<form action="" method="get">
+  <input type="date" name="day" value="{day}">
+  <input type="submit" value="submit">
+</form>"""
 
-@app.route("/days-at-home/<day>")
+
+@app.route("/days-at-home")
+def index():
+    day = request.args.get('day', str(datetime.date.today()))
+    days_out = count_days(day)
+    return calendar_form.format(day=day) + days_out
+
+
 def count_days(day):
     today = datetime.date.today()
     out = "Was at home:</p>"
