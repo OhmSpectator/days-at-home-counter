@@ -1,6 +1,26 @@
 import datetime
 
+from flask import Flask
+
 days_allowed_for_window_year = 182
+
+app = Flask(__name__)
+
+
+@app.route("/days-at-home/<day>")
+def count_days(day):
+    today = datetime.date.today()
+    out = "Was at home:</p>"
+    for interval in at_home:
+        out += str(interval)
+        out += '</p>'
+    if day:
+        try:
+            today = datetime.date.fromisoformat(day)
+        except ValueError:
+            pass
+    out += count_totals(today)
+    return out
 
 
 class DateInterval(object):
@@ -39,11 +59,12 @@ def count_totals(day):
         if year_ago in interval:
             partial_interval = DateInterval(year_ago, interval.end_date)
             total_duration_window_year += partial_interval.duration
-    print("Total days at home (by %s):" % day)
-    print("  for the last 12 months: %d (still in the swap: %d)" %
-          (total_duration_window_year, days_allowed_for_window_year - total_duration_window_year))
+    debug_out = "Total days at home (by %s):</p>" % day
+    debug_out += "  for the last 12 months: %d (still in the swap: %d)" % (
+        total_duration_window_year,
+        days_allowed_for_window_year - total_duration_window_year)
+    return debug_out
 
 
 if __name__ == '__main__':
-    today = datetime.date.today()
-    count_totals(today)
+    app.run(host="127.0.0.1", port=8080, debug=True)
