@@ -1,0 +1,13 @@
+[Unit]
+Description=uWSGI instance to serve Days At Home Counter web-sevice
+After=network.target
+
+[Service]
+User=*USER*
+Group=www-data
+WorkingDirectory=*PATH_TO_PROJECT*
+Environment="PATH=PATH_TO_VENV/bin"
+ExecStart=*PATH_TO_VENV*/bin/uwsgi --ini days-at-home-counter.ini
+
+[Install]
+WantedBy=multi-user.target
