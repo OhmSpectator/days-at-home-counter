@@ -75,7 +75,9 @@ class DateInterval(object):
                self.end_date == self.end_date
 
     def __str__(self):
-        return "from {0} until {1}".format(self.start_date, self.end_date)
+        return "from {} until {} ({} in total)".format(self.start_date,
+                                                       self.end_date,
+                                                       self.duration)
 
     def __contains__(self, date):
         return self.start_date <= date <= self.end_date
