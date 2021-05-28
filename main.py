@@ -11,12 +11,31 @@ calendar_form = """
 <form action="" method="get">
   <input type="date" name="day" value="{day}">
   <input type="submit" value="submit">
-</form>"""
+</form>
+<form action="" method="get">
+  <input type="date" name="interval-start" value="">
+  <input type="date" name="interval-end" value="">
+  <input type="submit" value="submit">
+</form>
+"""
 
 
 @app.route("/days-at-home")
 def index():
     day = request.args.get('day', str(datetime.date.today()))
+    interval_start_p = request.args.get('interval-start', '')
+    interval_end_p = request.args.get('interval-end', '')
+    interval_start = None
+    interval_end = None
+    try:
+        interval_start = datetime.date.fromisoformat(interval_start_p)
+        interval_end = datetime.date.fromisoformat(interval_end_p)
+    except ValueError:
+        pass
+    if interval_start and interval_end and \
+       interval_start < interval_end and \
+       DateInterval(interval_start, interval_end) not in at_home:
+        at_home.append(DateInterval(interval_start, interval_end))
     days_out = count_days(day)
     return calendar_form.format(day=day) + days_out
 
@@ -51,6 +70,10 @@ class DateInterval(object):
     def __lt__(self, other):
         return self.start_date < other.start_date
 
+    def __eq__(self, other):
+        return self.start_date == other.start_date and \
+               self.end_date == self.end_date
+
     def __str__(self):
         return "from {0} until {1}".format(self.start_date, self.end_date)
 
@@ -58,9 +81,7 @@ class DateInterval(object):
         return self.start_date <= date <= self.end_date
 
 
-at_home = [DateInterval('2020-08-02', '2020-09-12'),
-           DateInterval('2020-12-12', '2021-04-11'),
-           ]
+at_home = []
 
 
 def count_totals(day):
