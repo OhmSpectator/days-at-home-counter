@@ -1,4 +1,5 @@
 import datetime
+from hashlib import md5
 
 from flask import Flask
 from flask import request
@@ -27,6 +28,13 @@ def index():
     interval_end_p = request.args.get('interval-end', '')
     interval_start = None
     interval_end = None
+    remove = request.args.get('remove', None)
+    try:
+        for interval in at_home:
+            if interval.id == remove:
+                at_home.remove(interval)
+    except ValueError:
+        pass
     try:
         interval_start = datetime.date.fromisoformat(interval_start_p)
         interval_end = datetime.date.fromisoformat(interval_end_p)
@@ -42,10 +50,17 @@ def index():
 
 def count_days(day):
     today = datetime.date.today()
-    out = "Was at home:</p>"
+    out = "Was at home:"
+    out += "<ul>"
     for interval in at_home:
+        out += '<li>'
         out += str(interval)
-        out += '</p>'
+        out += """
+        <form method="get">
+        <button type="submit" value="{id}" name="remove">Submit</button>
+        </form>""".format(id=interval.id)
+        out += '</li>'
+    out += '</ul>'
     if day:
         try:
             today = datetime.date.fromisoformat(day)
@@ -66,6 +81,9 @@ class DateInterval(object):
         if isinstance(end_date, datetime.date):
             self.end_date = end_date
         self.duration = (self.end_date - self.start_date).days
+        hash_id = md5(self.start_date.isoformat().encode())
+        hash_id.update(self.end_date.isoformat().encode())
+        self.id = hash_id.hexdigest()
 
     def __lt__(self, other):
         return self.start_date < other.start_date
