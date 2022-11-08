@@ -40,12 +40,21 @@ def index():
         interval_end = datetime.date.fromisoformat(interval_end_p)
     except ValueError:
         pass
-    if interval_start and interval_end and \
-       interval_start < interval_end and \
-       DateInterval(interval_start, interval_end) not in at_home:
+    output = calendar_form.format(day=day) + count_days(day)
+    if not interval_start or not interval_end:
+        return output
+    if interval_start > interval_end:
+        return output
+    for interval in at_home:
+        if interval_start in interval:
+            return output
+        if interval_end in interval:
+            return output
+    interval_to_add = DateInterval(interval_start, interval_end)
+    if interval_to_add not in at_home:
         at_home.append(DateInterval(interval_start, interval_end))
-    days_out = count_days(day)
-    return calendar_form.format(day=day) + days_out
+        output = calendar_form.format(day=day) + count_days(day)
+    return output
 
 
 def count_days(day):
