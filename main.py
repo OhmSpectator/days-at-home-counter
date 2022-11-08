@@ -57,7 +57,7 @@ def count_days(day):
         out += str(interval)
         out += """
         <form method="get">
-        <button type="submit" value="{id}" name="remove">Submit</button>
+        <button type="submit" value="{id}" name="remove">Remove</button>
         </form>""".format(id=interval.id)
         out += '</li>'
     out += '</ul>'
