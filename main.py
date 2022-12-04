@@ -4,6 +4,8 @@ from hashlib import md5
 from flask import Flask
 from flask import request
 
+from markupsafe import escape
+
 days_allowed_for_window_year = 182
 
 app = Flask(__name__)
@@ -29,12 +31,7 @@ def index():
     interval_start = None
     interval_end = None
     remove = request.args.get('remove', None)
-    try:
-        for interval in at_home:
-            if interval.id == remove:
-                at_home.remove(interval)
-    except ValueError:
-        pass
+    at_home[:] = [interval for interval in at_home if interval.id != remove]
     try:
         interval_start = datetime.date.fromisoformat(interval_start_p)
         interval_end = datetime.date.fromisoformat(interval_end_p)
