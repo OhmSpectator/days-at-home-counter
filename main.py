@@ -4,7 +4,7 @@ from hashlib import md5
 from flask import Flask
 from flask import request
 
-from markupsafe import escape
+from flask import escape
 
 days_allowed_for_window_year = 182
 
@@ -26,11 +26,15 @@ calendar_form = """
 @app.route("/days-at-home")
 def index():
     day = request.args.get('day', str(datetime.date.today()))
+    escape(day)
     interval_start_p = request.args.get('interval-start', '')
+    escape(interval_start_p)
     interval_end_p = request.args.get('interval-end', '')
+    escape(interval_end_p)
     interval_start = None
     interval_end = None
     remove = request.args.get('remove', None)
+    escape(remove)
     at_home[:] = [interval for interval in at_home if interval.id != remove]
     try:
         interval_start = datetime.date.fromisoformat(interval_start_p)
