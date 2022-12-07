@@ -86,6 +86,8 @@ class DateInterval(object):
             self.end_date = datetime.date.fromisoformat(end_date)
         if isinstance(end_date, datetime.date):
             self.end_date = end_date
+        if start_date > end_date:
+            raise ValueError
         self.duration = (self.end_date - self.start_date).days
         hash_id = md5(self.start_date.isoformat().encode())
         hash_id.update(self.end_date.isoformat().encode())
@@ -106,21 +108,25 @@ class DateInterval(object):
     def __contains__(self, date):
         return self.start_date <= date <= self.end_date
 
+    def intersect(self, other):
+        result_start = max(self.start_date, other.start_date)
+        result_end = min(self.end_date, other.end_date)
+        if result_start > result_end:
+            return None
+        return DateInterval(result_start, result_end)
+
 
 at_home = []
 
 
 def count_totals(day):
     year_ago = day - datetime.timedelta(365)
+    year_interval = DateInterval(year_ago, day)
     total_duration_window_year = 0
     for interval in at_home:
-        if interval.end_date < year_ago or interval.start_date > day:
-            continue
-        if year_ago in interval:
-            interval = DateInterval(year_ago, interval.end_date)
-        if day in interval:
-            interval = DateInterval(interval.start_date, day)
-        total_duration_window_year += interval.duration
+        intersection = year_interval.intersect(interval)
+        if intersection is not None:
+            total_duration_window_year += intersection.duration
     debug_out = "Total days at home (by %s):</p>" % day
     debug_out += "  for the last 12 months: %d (still in the swap: %d)" % (
         total_duration_window_year,
