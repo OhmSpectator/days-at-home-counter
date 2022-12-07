@@ -114,11 +114,13 @@ def count_totals(day):
     year_ago = day - datetime.timedelta(365)
     total_duration_window_year = 0
     for interval in at_home:
-        if year_ago < interval.start_date:
-            total_duration_window_year += interval.duration
+        if interval.end_date < year_ago or interval.start_date > day:
+            continue
         if year_ago in interval:
-            partial_interval = DateInterval(year_ago, interval.end_date)
-            total_duration_window_year += partial_interval.duration
+            interval = DateInterval(year_ago, interval.end_date)
+        if day in interval:
+            interval = DateInterval(interval.start_date, day)
+        total_duration_window_year += interval.duration
     debug_out = "Total days at home (by %s):</p>" % day
     debug_out += "  for the last 12 months: %d (still in the swap: %d)" % (
         total_duration_window_year,
