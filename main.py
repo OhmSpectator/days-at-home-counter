@@ -10,6 +10,14 @@ days_allowed_for_window_year = 182
 
 app = Flask(__name__)
 
+head = """
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-LtrjvnR4Twt/qOuYxE721u19sVFLVSA4hf/rRt6PrZTmiPltdZcI7q7PXQBYTKyf" crossorigin="anonymous"></script>
+</head>
+"""
+
 calendar_form = """
 <form action="" method="get">
   <input type="date" name="day" value="{day}">
@@ -37,7 +45,7 @@ def index():
         interval_end = datetime.date.fromisoformat(interval_end_p)
     except ValueError:
         pass
-    output = calendar_form.format(day=day) + count_days(day)
+    output = head + calendar_form.format(day=day) + count_days(day)
     if not interval_start or not interval_end:
         return output
     if interval_start > interval_end:
