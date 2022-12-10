@@ -65,14 +65,15 @@ def index():
 def count_days(day):
     today = datetime.date.today()
     out = "Was at home:"
-    out += "<ul>"
-    for interval in at_home:
+    out += '<ul>'
+    for i in at_home:
         out += '<li>'
-        out += str(interval)
-        out += """
-        <form method="get">
-        <button type="submit" value="{id}" name="remove">Remove</button>
-        </form>""".format(id=interval.id)
+        out += '<div class="row">'
+        out += f'<div class="col-md-2">{i}</div>'
+        out += '<form method="get">'
+        out += f'<button type="submit" value="{i.id}" name="remove" class="btn btn-danger">remove</button>'
+        out += '</form>'
+        out += '</div>'
         out += '</li>'
     out += '</ul>'
     if day:
