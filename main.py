@@ -1,14 +1,11 @@
-import datetime
 from hashlib import md5
+import datetime
 
-from flask import Flask
-from flask import request
-
-from flask import escape
+from flask import Flask, request, escape, render_template
 
 days_allowed_for_window_year = 182
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 
 head = """
 <head>
@@ -64,24 +61,17 @@ def index():
 
 def count_days(day):
     today = datetime.date.today()
-    out = "Was at home:"
-    out += '<ul>'
-    for i in at_home:
-        out += '<li>'
-        out += '<div class="row">'
-        out += f'<div class="col-md-2">{i}</div>'
-        out += '<form method="get">'
-        out += f'<button type="submit" value="{i.id}" name="remove" class="btn btn-danger">remove</button>'
-        out += '</form>'
-        out += '</div>'
-        out += '</li>'
-    out += '</ul>'
     if day:
         try:
             today = datetime.date.fromisoformat(day)
         except ValueError:
             pass
-    out += count_totals(today)
+
+    # get the Jinja2 template
+    template = render_template('intervals_list.html', at_home=at_home, today=today)
+
+    # render the template with the specified data
+    out = template
     return out
 
 
