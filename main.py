@@ -62,7 +62,7 @@ def count_days(day):
     template = render_template('intervals_list.html', at_home=at_home, today=today)
 
     # render the template with the specified data
-    out = template
+    out = template + count_totals(today)
     return out
 
 
@@ -125,4 +125,4 @@ def count_totals(day):
 
 
 if __name__ == '__main__':
-    app.run(host="127.0.0.1", port=8082, debug=True)
+    app.run(host="127.0.0.1", port=8080, debug=True)
