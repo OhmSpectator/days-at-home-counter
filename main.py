@@ -15,19 +15,6 @@ head = """
 </head>
 """
 
-calendar_form = """
-<form action="" method="get">
-  <input type="date" name="day" value="{day}">
-  <input type="submit" value="submit">
-</form>
-<form action="" method="get">
-  <input type="date" name="interval-start" value="">
-  <input type="date" name="interval-end" value="">
-  <input type="submit" value="submit">
-</form>
-"""
-
-
 @app.route("/days-at-home")
 def index():
     day = escape(request.args.get('day', str(datetime.date.today())))
@@ -42,7 +29,9 @@ def index():
         interval_end = datetime.date.fromisoformat(interval_end_p)
     except ValueError:
         pass
-    output = head + calendar_form.format(day=day) + count_days(day)
+    output = head
+    output += render_template('calendar_form.html', day=day)
+    output += count_days(day)
     if not interval_start or not interval_end:
         return output
     if interval_start > interval_end:
@@ -55,7 +44,9 @@ def index():
     interval_to_add = DateInterval(interval_start, interval_end)
     if interval_to_add not in at_home:
         at_home.append(DateInterval(interval_start, interval_end))
-        output = calendar_form.format(day=day) + count_days(day)
+        output = head
+        output += render_template('calendar_form.html', day=day)
+        output += count_days(day)
     return output
 
 
@@ -134,4 +125,4 @@ def count_totals(day):
 
 
 if __name__ == '__main__':
-    app.run(host="127.0.0.1", port=8080, debug=True)
+    app.run(host="127.0.0.1", port=8082, debug=True)
