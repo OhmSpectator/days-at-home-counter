@@ -21,9 +21,7 @@ def index():
         interval_end = datetime.date.fromisoformat(interval_end_p)
     except ValueError:
         pass
-    output = render_template('header.html')
-    output += render_template('calendar_form.html', day=day)
-    output += count_days(day)
+    output = create_page(day)
     if not interval_start or not interval_end:
         return output
     if interval_start > interval_end:
@@ -36,10 +34,15 @@ def index():
     interval_to_add = DateInterval(interval_start, interval_end)
     if interval_to_add not in at_home:
         at_home.append(DateInterval(interval_start, interval_end))
-        output = render_template('header.html')
-        output += render_template('calendar_form.html', day=day)
-        output += count_days(day)
+        output = create_page(day)
     return output
+
+
+def create_page(day):
+    page = render_template('header.html')
+    page += render_template('calendar_form.html', day=day)
+    page += count_days(day)
+    return page
 
 
 def count_days(day):
