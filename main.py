@@ -103,7 +103,6 @@ class DateInterval(object):
 
 at_home = []
 
-
 def count_totals(day):
     year_ago = day - datetime.timedelta(365)
     year_interval = DateInterval(year_ago, day)
@@ -112,11 +111,11 @@ def count_totals(day):
         intersection = year_interval.intersect(interval)
         if intersection is not None:
             total_duration_window_year += intersection.duration
-    debug_out = "Total days at home (by %s):</p>" % day
-    debug_out += "  for the last 12 months: %d (still in the swap: %d)" % (
-        total_duration_window_year,
-        days_allowed_for_window_year - total_duration_window_year)
-    return debug_out
+    out = render_template('totals.html',
+                          day=day,
+                          total_duration_window_year=total_duration_window_year,
+                          days_allowed_for_window_year=days_allowed_for_window_year)
+    return out
 
 
 if __name__ == '__main__':
