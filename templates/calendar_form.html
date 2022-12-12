@@ -1,9 +1,11 @@
-<form action="" method="get">
-    <input type="date" name="day" value="{{ day }}}">
-    <input type="submit" value="submit">
+<form action="" method="get" class="form-inline">
+    <input type="date" name="day" value="{{ day }}" id="day" class="form-control" placeholder="Enter reference date">
+    <input type="submit" value="submit" class="btn btn-primary">
 </form>
-<form action="" method="get">
-    <input type="date" name="interval-start" value="">
-    <input type="date" name="interval-end" value="">
-    <input type="submit" value="submit">
+<form action="" method="get" class="form-inline">
+    <label class="mr-1">Enter date range: from</label>
+    <input type="date" class="form-control col-1" name="interval-start">
+    <label class="mr-1 ml-1">to</label>
+    <input type="date" class="form-control col-1" name="interval-end">
+    <input type="submit" value="submit" class="btn btn-primary">
 </form>
