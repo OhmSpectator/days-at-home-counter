@@ -7,14 +7,6 @@ days_allowed_for_window_year = 182
 
 app = Flask(__name__, template_folder='templates')
 
-head = """
-<head>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-LtrjvnR4Twt/qOuYxE721u19sVFLVSA4hf/rRt6PrZTmiPltdZcI7q7PXQBYTKyf" crossorigin="anonymous"></script>
-</head>
-"""
-
 @app.route("/days-at-home")
 def index():
     day = escape(request.args.get('day', str(datetime.date.today())))
@@ -29,7 +21,7 @@ def index():
         interval_end = datetime.date.fromisoformat(interval_end_p)
     except ValueError:
         pass
-    output = head
+    output = render_template('header.html')
     output += render_template('calendar_form.html', day=day)
     output += count_days(day)
     if not interval_start or not interval_end:
@@ -44,7 +36,7 @@ def index():
     interval_to_add = DateInterval(interval_start, interval_end)
     if interval_to_add not in at_home:
         at_home.append(DateInterval(interval_start, interval_end))
-        output = head
+        output = render_template('header.html')
         output += render_template('calendar_form.html', day=day)
         output += count_days(day)
     return output
