@@ -7,14 +7,14 @@ days_allowed_for_window_year = 182
 
 app = Flask(__name__, template_folder='templates')
 
-@app.route("/days-at-home")
+@app.route("/days-at-home", methods=['GET', 'POST'])
 def index():
-    day = escape(request.args.get('day', str(datetime.date.today())))
-    interval_start_p = escape(request.args.get('interval-start', ''))
-    interval_end_p = escape(request.args.get('interval-end', ''))
+    day = escape(request.form.get('day', str(datetime.date.today())))
+    interval_start_p = escape(request.form.get('interval-start', ''))
+    interval_end_p = escape(request.form.get('interval-end', ''))
     interval_start = None
     interval_end = None
-    remove = escape(request.args.get('remove', None))
+    remove = escape(request.form.get('remove', None))
     at_home[:] = [interval for interval in at_home if interval.id != remove]
     try:
         interval_start = datetime.date.fromisoformat(interval_start_p)
