@@ -3,12 +3,12 @@ import datetime
 
 from flask import Flask, request, escape, render_template
 
-days_allowed_for_window_year = 182
 
 app = Flask(__name__, template_folder='templates')
 
 @app.route("/days-at-home", methods=['GET', 'POST'])
 def index():
+    days_allowed = int(escape(request.form.get('days_allowed', '182')))
     day = escape(request.form.get('day', str(datetime.date.today())))
     interval_start_p = escape(request.form.get('interval-start', ''))
     interval_end_p = escape(request.form.get('interval-end', ''))
@@ -21,7 +21,7 @@ def index():
         interval_end = datetime.date.fromisoformat(interval_end_p)
     except ValueError:
         pass
-    output = create_page(day)
+    output = create_page(day, days_allowed)
     if not interval_start or not interval_end:
         return output
     if interval_start > interval_end:
@@ -34,18 +34,18 @@ def index():
     interval_to_add = DateInterval(interval_start, interval_end)
     if interval_to_add not in at_home:
         at_home.append(DateInterval(interval_start, interval_end))
-        output = create_page(day)
+        output = create_page(day, days_allowed)
     return output
 
 
-def create_page(day):
+def create_page(day, days_allowed):
     page = render_template('header.html')
-    page += render_template('calendar_form.html', day=day)
-    page += count_days(day)
+    page += render_template('calendar_form.html', day=day, days_allowed=days_allowed)
+    page += count_days(day, days_allowed)
     return page
 
 
-def count_days(day):
+def count_days(day, days_allowed):
     today = datetime.date.today()
     if day:
         try:
@@ -57,7 +57,7 @@ def count_days(day):
     template = render_template('intervals_list.html', at_home=at_home, today=today)
 
     # render the template with the specified data
-    out = template + count_totals(today)
+    out = template + count_totals(today, days_allowed)
     return out
 
 
@@ -103,7 +103,7 @@ class DateInterval(object):
 
 at_home = []
 
-def count_totals(day):
+def count_totals(day, days_allowed):
     year_ago = day - datetime.timedelta(365)
     year_interval = DateInterval(year_ago, day)
     total_duration_window_year = 0
@@ -114,7 +114,7 @@ def count_totals(day):
     out = render_template('totals.html',
                           day=day,
                           total_duration_window_year=total_duration_window_year,
-                          days_allowed_for_window_year=days_allowed_for_window_year)
+                          days_allowed_for_window_year=days_allowed)
     return out
 
 
