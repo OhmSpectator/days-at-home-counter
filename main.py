@@ -9,6 +9,8 @@ app = Flask(__name__, template_folder='templates')
 @app.route("/days-at-home", methods=['GET', 'POST'])
 def index():
     days_allowed = int(escape(request.form.get('days_allowed', '182')))
+    if days_allowed < 0 or days_allowed > 365:
+        days_allowed = 182
     day = escape(request.form.get('day', str(datetime.date.today())))
     interval_start_p = escape(request.form.get('interval-start', ''))
     interval_end_p = escape(request.form.get('interval-end', ''))
