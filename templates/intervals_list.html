@@ -4,7 +4,7 @@
         {% for item in at_home %}
         <li>
             <div class="row">
-                <div class="col-md-2">{{ item }}</div>
+                <div class="col-md-2 form-control">{{ item }}</div>
                 <form method="post">
                     <button type="submit" value="{{ item.id }}" name="remove" class="btn btn-danger">remove</button>
                 </form>
