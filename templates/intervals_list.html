@@ -1,15 +1,14 @@
-<div class="p-2">
-    Was at home:
-    <ul>
+<div class="pl-4">
+    {% if at_home %}
         {% for item in at_home %}
-        <li>
-            <div class="row">
-                <div class="col-md-2 form-control">{{ item }}</div>
+            <div class="form-inline">
                 <form method="post">
+                    <div class="form-control">{{ item }}</div>
                     <button type="submit" value="{{ item.id }}" name="remove" class="btn btn-danger">remove</button>
                 </form>
             </div>
-        </li>
         {% endfor %}
-    </ul>
+    {% else %}
+        <p><i>The list is empty</i></p>
+    {% endif %}
 </div>
