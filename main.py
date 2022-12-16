@@ -1,13 +1,23 @@
 from hashlib import md5
+import uuid
 import datetime
 
-from flask import Flask, request, escape, render_template
+from flask import Flask, request, escape, render_template, make_response
 
 
 app = Flask(__name__, template_folder='templates')
 
 @app.route("/days-at-home", methods=['GET', 'POST'])
 def index():
+    new_user = False
+    user_id = request.form.get('uuid')
+    if user_id is None:
+        user_id = escape(request.cookies.get('uuid'))
+    response = make_response()
+    if user_id is None:
+        new_user = True
+        user_id = str(uuid.uuid4())
+    response.set_cookie('uuid', user_id)
     days_allowed = int(escape(request.form.get('days_allowed', '182')))
     if days_allowed < 0 or days_allowed > 365:
         days_allowed = 182
@@ -17,37 +27,41 @@ def index():
     interval_start = None
     interval_end = None
     remove = escape(request.form.get('remove', None))
-    at_home[:] = [interval for interval in at_home if interval.id != remove]
+    if at_home.get(user_id) is None:
+        at_home[user_id] = []
+    if remove:
+        at_home[user_id][:] = [interval for interval in at_home[user_id] if interval.id != remove]
     try:
         interval_start = datetime.date.fromisoformat(interval_start_p)
         interval_end = datetime.date.fromisoformat(interval_end_p)
     except ValueError:
         pass
-    output = create_page(day, days_allowed)
+    response.response += create_page(new_user, user_id, day, days_allowed)
     if not interval_start or not interval_end:
-        return output
+        return response
     if interval_start > interval_end:
-        return output
-    for interval in at_home:
+        return response
+    for interval in at_home[user_id]:
         if interval_start in interval:
-            return output
+            return response
         if interval_end in interval:
-            return output
+            return response
     interval_to_add = DateInterval(interval_start, interval_end)
-    if interval_to_add not in at_home:
-        at_home.append(DateInterval(interval_start, interval_end))
-        output = create_page(day, days_allowed)
-    return output
+    if interval_to_add not in at_home[user_id]:
+        at_home[user_id].append(DateInterval(interval_start, interval_end))
+        response.response = create_page(new_user, user_id, day, days_allowed)
+    return response
 
 
-def create_page(day, days_allowed):
+def create_page(new_user, user_id, day, days_allowed):
     page = render_template('header.html')
+    page += render_template('login.html', uuid=user_id, new_user=new_user)
     page += render_template('calendar_form.html', day=day, days_allowed=days_allowed)
-    page += count_days(day, days_allowed)
+    page += count_days(user_id, day, days_allowed)
     return page
 
 
-def count_days(day, days_allowed):
+def count_days(user_id, day, days_allowed):
     today = datetime.date.today()
     if day:
         try:
@@ -56,10 +70,10 @@ def count_days(day, days_allowed):
             pass
 
     # get the Jinja2 template
-    template = render_template('intervals_list.html', at_home=at_home, today=today)
+    template = render_template('intervals_list.html', at_home=at_home[user_id], today=today)
 
     # render the template with the specified data
-    out = template + count_totals(today, days_allowed)
+    out = template + count_totals(user_id, today, days_allowed)
     return out
 
 
@@ -101,13 +115,13 @@ class DateInterval(object):
         return DateInterval(result_start, result_end)
 
 
-at_home = []
+at_home = {}
 
-def count_totals(day, days_allowed):
+def count_totals(user_id, day, days_allowed):
     year_ago = day - datetime.timedelta(365)
     year_interval = DateInterval(year_ago, day)
     total_duration_window_year = 0
-    for interval in at_home:
+    for interval in at_home[user_id]:
         intersection = year_interval.intersect(interval)
         if intersection is not None:
             total_duration_window_year += intersection.duration
