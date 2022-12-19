@@ -10,14 +10,14 @@ app = Flask(__name__, template_folder='templates')
 @app.route("/days-at-home", methods=['GET', 'POST'])
 def index():
     new_user = False
-    user_id = request.form.get('uuid')
+    user_id = request.args.get('uuid')
     if user_id is None:
         user_id = request.cookies.get('uuid')
-    response = make_response()
     if user_id is None:
         new_user = True
         user_id = str(uuid.uuid4())
     user_id = escape(user_id)
+    response = make_response()
     response.set_cookie('uuid', user_id)
     days_allowed = int(escape(request.form.get('days_allowed', '182')))
     if days_allowed < 0 or days_allowed > 365:
