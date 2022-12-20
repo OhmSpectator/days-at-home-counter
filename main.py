@@ -53,6 +53,8 @@ def index():
             return response
         if interval_end in interval:
             return response
+        if interval_start < interval.start_date and interval_end > interval.end_date:
+            return response
     interval_to_add = DateInterval(interval_start, interval_end)
     if interval_to_add not in at_home[user_id].get_intervals():
         at_home[user_id].add_interval(DateInterval(interval_start, interval_end))
