@@ -6,6 +6,7 @@ from flask import Flask, request, escape, render_template, make_response
 
 
 app = Flask(__name__, template_folder='templates')
+at_home = {}
 
 @app.route("/days-at-home", methods=['GET', 'POST'])
 def index():
@@ -19,38 +20,43 @@ def index():
     user_id = escape(user_id)
     response = make_response()
     response.set_cookie('uuid', user_id)
-    days_allowed = int(escape(request.form.get('days_allowed', '182')))
-    if days_allowed < 0 or days_allowed > 365:
-        days_allowed = 182
-    day = escape(request.form.get('day', str(datetime.date.today())))
+    days_allowed_str = request.form.get('days_allowed', None)
+    try:
+        days_allowed = int(escape(days_allowed_str)) if days_allowed_str else None
+    except ValueError:
+        days_allowed = None
+    remove_id_str = request.form.get('remove', None)
+    remove_id = escape(remove_id_str) if remove_id_str else None
+    if at_home.get(user_id) is None:
+        at_home[user_id] = User(user_id, 182)
+    if days_allowed:
+        at_home[user_id].days_allowed = days_allowed
+    if remove_id is not None:
+        at_home[user_id].remove_interval(remove_id)
     interval_start_p = escape(request.form.get('interval-start', ''))
     interval_end_p = escape(request.form.get('interval-end', ''))
     interval_start = None
     interval_end = None
-    remove = escape(request.form.get('remove', None))
-    if at_home.get(user_id) is None:
-        at_home[user_id] = []
-    if remove:
-        at_home[user_id][:] = [interval for interval in at_home[user_id] if interval.id != remove]
     try:
         interval_start = datetime.date.fromisoformat(interval_start_p)
         interval_end = datetime.date.fromisoformat(interval_end_p)
     except ValueError:
         pass
-    response.response += create_page(new_user, user_id, day, days_allowed)
+    day = escape(request.form.get('day', str(datetime.date.today())))
+    response.response += create_page(new_user, user_id, day, at_home[user_id].days_allowed)
     if not interval_start or not interval_end:
         return response
     if interval_start > interval_end:
         return response
-    for interval in at_home[user_id]:
+    for interval in at_home[user_id].get_intervals():
         if interval_start in interval:
             return response
         if interval_end in interval:
             return response
     interval_to_add = DateInterval(interval_start, interval_end)
-    if interval_to_add not in at_home[user_id]:
-        at_home[user_id].append(DateInterval(interval_start, interval_end))
-        response.response = create_page(new_user, user_id, day, days_allowed)
+    if interval_to_add not in at_home[user_id].get_intervals():
+        at_home[user_id].add_interval(DateInterval(interval_start, interval_end))
+        response.response = create_page(new_user, user_id, day, at_home[user_id].days_allowed)
     return response
 
 
@@ -71,7 +77,7 @@ def count_days(user_id, day, days_allowed):
             pass
 
     # get the Jinja2 template
-    template = render_template('intervals_list.html', at_home=at_home[user_id], today=today)
+    template = render_template('intervals_list.html', at_home=at_home[user_id].get_intervals(), today=today)
 
     # render the template with the specified data
     out = template + count_totals(user_id, today, days_allowed)
@@ -116,13 +122,29 @@ class DateInterval(object):
         return DateInterval(result_start, result_end)
 
 
-at_home = {}
+
+class User(object):
+    def __init__(self, user_id, days_allowed):
+        self.days_allowed = days_allowed
+        self.user_id = user_id
+        self.intervals = []
+
+    def add_interval(self, interval):
+        self.intervals.append(interval)
+
+    def remove_interval(self, remove_id):
+        self.intervals[:] = [interval for interval in self.intervals if interval.id != remove_id]
+
+    def get_intervals(self):
+        return self.intervals
+
+
 
 def count_totals(user_id, day, days_allowed):
     year_ago = day - datetime.timedelta(365)
     year_interval = DateInterval(year_ago, day)
     total_duration_window_year = 0
-    for interval in at_home[user_id]:
+    for interval in at_home[user_id].get_intervals():
         intersection = year_interval.intersect(interval)
         if intersection is not None:
             total_duration_window_year += intersection.duration
