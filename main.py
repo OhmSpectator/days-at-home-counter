@@ -10,12 +10,10 @@ at_home = {}
 
 @app.route("/days-at-home", methods=['GET', 'POST'])
 def index():
-    new_user = False
     user_id = request.args.get('uuid')
     if user_id is None:
         user_id = request.cookies.get('uuid')
     if user_id is None:
-        new_user = True
         user_id = str(uuid.uuid4())
     user_id = escape(user_id)
     response = make_response()
@@ -43,7 +41,7 @@ def index():
     except ValueError:
         pass
     day = escape(request.form.get('day', str(datetime.date.today())))
-    response.response += create_page(new_user, user_id, day, at_home[user_id].days_allowed)
+    response.response += create_page(user_id, day, at_home[user_id].days_allowed)
     if not interval_start or not interval_end:
         return response
     if interval_start > interval_end:
@@ -58,13 +56,13 @@ def index():
     interval_to_add = DateInterval(interval_start, interval_end)
     if interval_to_add not in at_home[user_id].get_intervals():
         at_home[user_id].add_interval(DateInterval(interval_start, interval_end))
-        response.response = create_page(new_user, user_id, day, at_home[user_id].days_allowed)
+        response.response = create_page(user_id, day, at_home[user_id].days_allowed)
     return response
 
 
-def create_page(new_user, user_id, day, days_allowed):
+def create_page(user_id, day, days_allowed):
     page = render_template('header.html')
-    page += render_template('login.html', uuid=user_id, new_user=new_user)
+    page += render_template('login.html', uuid=user_id)
     page += render_template('calendar_form.html', day=day, days_allowed=days_allowed)
     page += count_days(user_id, day, days_allowed)
     return page
