@@ -66,18 +66,18 @@ def index():
         interval_end = datetime.date.fromisoformat(interval_end_p)
     except ValueError:
         pass
-    response.response = create_page(user_id, day, at_home[user_id].days_allowed)
+    response.response = _create_page(user_id, day, at_home[user_id].days_allowed)
     if not _verify_intervals(interval_start, interval_end, at_home[user_id].get_intervals()):
         return response
     interval_to_add = DateInterval(interval_start, interval_end)
     if interval_to_add not in at_home[user_id].get_intervals():
         at_home[user_id].add_interval(DateInterval(interval_start, interval_end))
-        response.response = create_page(user_id, day, at_home[user_id].days_allowed)
+        response.response = _create_page(user_id, day, at_home[user_id].days_allowed)
     return response
 
 
-def create_page(user_id, day, days_allowed):
-    total_days = count_totals(user_id, day)
+def _create_page(user_id, day, days_allowed):
+    total_days = _count_totals(user_id, day)
     intervals = at_home[user_id].get_intervals()
     return render_template('index.html', uuid=user_id, day=day, days_allowed=days_allowed,
                            intervals=intervals,
@@ -141,7 +141,7 @@ class User(object):
 
 
 
-def count_totals(user_id, day):
+def _count_totals(user_id, day):
     year_ago = day - datetime.timedelta(365)
     year_interval = DateInterval(year_ago, day)
     total_duration_window_year = 0
