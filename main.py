@@ -23,12 +23,22 @@ def index():
         days_allowed = int(escape(days_allowed_str)) if days_allowed_str else None
     except ValueError:
         days_allowed = None
-    remove_id_str = request.form.get('remove', None)
-    remove_id = escape(remove_id_str) if remove_id_str else None
+    day = request.form.get('day', None)
+    if day is not None:
+        try:
+            day = datetime.date.fromisoformat(escape(day))
+        except ValueError:
+            day = datetime.date.today()
     if at_home.get(user_id) is None:
-        at_home[user_id] = User(user_id, 182)
+        at_home[user_id] = User(user_id, 182, day)
     if days_allowed:
         at_home[user_id].days_allowed = days_allowed
+    if day is not None:
+        at_home[user_id].day = day
+    else:
+        day = at_home[user_id].day
+    remove_id_str = request.form.get('remove', None)
+    remove_id = escape(remove_id_str) if remove_id_str else None
     if remove_id is not None:
         at_home[user_id].remove_interval(remove_id)
     interval_start_p = escape(request.form.get('interval-start', ''))
@@ -40,11 +50,6 @@ def index():
         interval_end = datetime.date.fromisoformat(interval_end_p)
     except ValueError:
         pass
-    day = escape(request.form.get('day', str(datetime.date.today())))
-    try:
-        day = datetime.date.fromisoformat(day)
-    except ValueError:
-        day = datetime.date.today()
     response.response = create_page(user_id, day, at_home[user_id].days_allowed)
     if not interval_start or not interval_end:
         return response
@@ -112,9 +117,10 @@ class DateInterval(object):
 
 
 class User(object):
-    def __init__(self, user_id, days_allowed):
+    def __init__(self, user_id, days_allowed, day):
         self.days_allowed = days_allowed
         self.user_id = user_id
+        self.day = datetime.date.today() if day is None else day
         self.intervals = []
 
     def add_interval(self, interval):
