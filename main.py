@@ -8,6 +8,22 @@ from flask import Flask, request, escape, render_template, make_response
 app = Flask(__name__, template_folder='templates')
 at_home = {}
 
+
+def _verify_intervals(start, end, stored_intervals):
+    if not start or not end:
+        return False
+    if start > end:
+        return False
+    for interval in stored_intervals:
+        if start in interval:
+            return False
+        if end in interval:
+            return False
+        if start < interval.start_date and end > interval.end_date:
+            return False
+    return True
+
+
 @app.route("/days-at-home", methods=['GET', 'POST'])
 def index():
     user_id = request.args.get('uuid')
@@ -51,17 +67,8 @@ def index():
     except ValueError:
         pass
     response.response = create_page(user_id, day, at_home[user_id].days_allowed)
-    if not interval_start or not interval_end:
+    if not _verify_intervals(interval_start, interval_end, at_home[user_id].get_intervals()):
         return response
-    if interval_start > interval_end:
-        return response
-    for interval in at_home[user_id].get_intervals():
-        if interval_start in interval:
-            return response
-        if interval_end in interval:
-            return response
-        if interval_start < interval.start_date and interval_end > interval.end_date:
-            return response
     interval_to_add = DateInterval(interval_start, interval_end)
     if interval_to_add not in at_home[user_id].get_intervals():
         at_home[user_id].add_interval(DateInterval(interval_start, interval_end))
