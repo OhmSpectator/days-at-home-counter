@@ -41,7 +41,11 @@ def index():
     except ValueError:
         pass
     day = escape(request.form.get('day', str(datetime.date.today())))
-    response.response += create_page(user_id, day, at_home[user_id].days_allowed)
+    try:
+        day = datetime.date.fromisoformat(day)
+    except ValueError:
+        day = datetime.date.today()
+    response.response = create_page(user_id, day, at_home[user_id].days_allowed)
     if not interval_start or not interval_end:
         return response
     if interval_start > interval_end:
@@ -61,27 +65,16 @@ def index():
 
 
 def create_page(user_id, day, days_allowed):
-    page = render_template('header.html')
+    page = render_template('head.html')
     page += render_template('login.html', uuid=user_id)
     page += render_template('calendar_form.html', day=day, days_allowed=days_allowed)
-    page += count_days(user_id, day, days_allowed)
+    page += render_template('intervals_list.html', at_home=at_home[user_id].get_intervals(), today=day)
+    total_duration_window_year = count_totals(user_id, day)
+    page += render_template('totals.html',
+                            day=day,
+                            total_duration_window_year=total_duration_window_year,
+                            days_allowed_for_window_year=days_allowed)
     return page
-
-
-def count_days(user_id, day, days_allowed):
-    today = datetime.date.today()
-    if day:
-        try:
-            today = datetime.date.fromisoformat(day)
-        except ValueError:
-            pass
-
-    # get the Jinja2 template
-    template = render_template('intervals_list.html', at_home=at_home[user_id].get_intervals(), today=today)
-
-    # render the template with the specified data
-    out = template + count_totals(user_id, today, days_allowed)
-    return out
 
 
 class DateInterval(object):
@@ -140,7 +133,7 @@ class User(object):
 
 
 
-def count_totals(user_id, day, days_allowed):
+def count_totals(user_id, day):
     year_ago = day - datetime.timedelta(365)
     year_interval = DateInterval(year_ago, day)
     total_duration_window_year = 0
@@ -148,11 +141,7 @@ def count_totals(user_id, day, days_allowed):
         intersection = year_interval.intersect(interval)
         if intersection is not None:
             total_duration_window_year += intersection.duration
-    out = render_template('totals.html',
-                          day=day,
-                          total_duration_window_year=total_duration_window_year,
-                          days_allowed_for_window_year=days_allowed)
-    return out
+    return total_duration_window_year
 
 
 if __name__ == '__main__':
