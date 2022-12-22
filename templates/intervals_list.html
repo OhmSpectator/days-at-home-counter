@@ -1,7 +1,7 @@
 <div class="pl-4">
-    {% if at_home %}
-        {% for item in at_home %}
-            <div class="form-inline">
+    {% if intervals %}
+        {% for item in intervals %}
+            <div class="form-inline py-2">
                 <form method="post">
                     <div class="form-control">{{ item }}</div>
                     <button type="submit" value="{{ item.id }}" name="remove" class="btn btn-danger">remove</button>

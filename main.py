@@ -65,16 +65,11 @@ def index():
 
 
 def create_page(user_id, day, days_allowed):
-    page = render_template('head.html')
-    page += render_template('login.html', uuid=user_id)
-    page += render_template('calendar_form.html', day=day, days_allowed=days_allowed)
-    page += render_template('intervals_list.html', at_home=at_home[user_id].get_intervals(), today=day)
-    total_duration_window_year = count_totals(user_id, day)
-    page += render_template('totals.html',
-                            day=day,
-                            total_duration_window_year=total_duration_window_year,
-                            days_allowed_for_window_year=days_allowed)
-    return page
+    total_days = count_totals(user_id, day)
+    intervals = at_home[user_id].get_intervals()
+    return render_template('index.html', uuid=user_id, day=day, days_allowed=days_allowed,
+                           intervals=intervals,
+                           total_duration=total_days)
 
 
 class DateInterval(object):
