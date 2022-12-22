@@ -96,7 +96,7 @@ class DateInterval(object):
             self.end_date = end_date
         if start_date > end_date:
             raise ValueError
-        self.duration = (self.end_date - self.start_date).days
+        self.duration = (self.end_date - self.start_date).days + 1
         hash_id = md5(self.start_date.isoformat().encode())
         hash_id.update(self.end_date.isoformat().encode())
         self.id = hash_id.hexdigest()
