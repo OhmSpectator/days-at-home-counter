@@ -1,7 +1,7 @@
 import uuid
 import datetime
 
-from flask import Flask, request, escape, render_template, make_response
+from flask import Flask, request, escape, render_template, g, after_this_request
 
 from DateInterval import DateInterval
 from User import User
@@ -25,16 +25,25 @@ def _verify_intervals(start, end, stored_intervals):
     return True
 
 
-@app.route("/days-at-home", methods=['GET', 'POST'])
-def index():
+@app.before_request
+def _identify_user():
     user_id = request.args.get('uuid')
     if user_id is None:
         user_id = request.cookies.get('uuid')
     if user_id is None:
         user_id = str(uuid.uuid4())
-    user_id = escape(user_id)
-    response = make_response()
-    response.set_cookie('uuid', user_id)
+
+    @after_this_request
+    def _set_user_id(response):
+        response.set_cookie('uuid', user_id)
+        return response
+
+    g.user_id = escape(user_id)
+
+
+@app.route("/days-at-home", methods=['GET', 'POST'])
+def index():
+    user_id = g.user_id
     days_allowed_str = request.form.get('days_allowed', None)
     try:
         days_allowed = int(escape(days_allowed_str)) if days_allowed_str else None
@@ -67,14 +76,14 @@ def index():
         interval_end = datetime.date.fromisoformat(interval_end_p)
     except ValueError:
         pass
-    response.response = _create_page(user_id, day, at_home[user_id].days_allowed)
+    page = _create_page(user_id, day, at_home[user_id].days_allowed)
     if not _verify_intervals(interval_start, interval_end, at_home[user_id].get_intervals()):
-        return response
+        return page
     interval_to_add = DateInterval(interval_start, interval_end)
     if interval_to_add not in at_home[user_id].get_intervals():
         at_home[user_id].add_interval(DateInterval(interval_start, interval_end))
-        response.response = _create_page(user_id, day, at_home[user_id].days_allowed)
-    return response
+        page = _create_page(user_id, day, at_home[user_id].days_allowed)
+    return page
 
 
 def _create_page(user_id, day, days_allowed):
