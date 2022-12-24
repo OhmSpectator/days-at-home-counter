@@ -1,7 +1,7 @@
 import datetime
 
 
-class User(object):
+class User:
     def __init__(self, user_id, days_allowed, day):
         self.days_allowed = days_allowed
         self.user_id = user_id

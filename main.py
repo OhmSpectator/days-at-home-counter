@@ -3,8 +3,8 @@ import datetime
 
 from flask import Flask, request, escape, render_template, g, after_this_request
 
-from DateInterval import DateInterval
-from User import User
+from dates_interval import DatesInterval
+from user import User
 
 app = Flask(__name__, template_folder='templates')
 at_home = {}
@@ -79,9 +79,9 @@ def index():
     page = _create_page(user_id, day, at_home[user_id].days_allowed)
     if not _verify_intervals(interval_start, interval_end, at_home[user_id].get_intervals()):
         return page
-    interval_to_add = DateInterval(interval_start, interval_end)
+    interval_to_add = DatesInterval(interval_start, interval_end)
     if interval_to_add not in at_home[user_id].get_intervals():
-        at_home[user_id].add_interval(DateInterval(interval_start, interval_end))
+        at_home[user_id].add_interval(DatesInterval(interval_start, interval_end))
         page = _create_page(user_id, day, at_home[user_id].days_allowed)
     return page
 
@@ -96,7 +96,7 @@ def _create_page(user_id, day, days_allowed):
 
 def _count_totals(user_id, day):
     year_ago = day - datetime.timedelta(365)
-    year_interval = DateInterval(year_ago, day)
+    year_interval = DatesInterval(year_ago, day)
     total_duration_window_year = 0
     for interval in at_home[user_id].get_intervals():
         intersection = year_interval.intersect(interval)

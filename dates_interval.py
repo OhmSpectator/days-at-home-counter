@@ -2,7 +2,7 @@ import datetime
 from hashlib import md5
 
 
-class DateInterval(object):
+class DatesInterval:
     def __init__(self, start_date, end_date):
         if isinstance(start_date, str):
             self.start_date = datetime.date.fromisoformat(start_date)
@@ -37,4 +37,4 @@ class DateInterval(object):
         result_end = min(self.end_date, other.end_date)
         if result_start > result_end:
             return None
-        return DateInterval(result_start, result_end)
+        return DatesInterval(result_start, result_end)
