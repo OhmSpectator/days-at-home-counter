@@ -2,9 +2,9 @@
     <p>Set the date to calculate against: <a href="#collapsibleSetDateForm" data-toggle="collapse">{{ day }}</a></p>
     <div id="collapsibleSetDateForm" class="collapse">
         <form action="" method="post" class="form-inline">
-            Set the date:
+            <label for="day_against">Set the date:</label>
             <div class="ml-1">
-                <input type="date" name="day" value="{{ day }}" class="form-control">
+                <input type="date" name="day" id="day_against" value="{{ day }}" class="form-control">
                 <input type="submit" value="submit" class="btn btn-primary">
             </div>
         </form>
@@ -12,7 +12,7 @@
     <p>Set the number of days allowed: <a href="#collapsibleDaysAllowedForm" data-toggle="collapse">{{ days_allowed }}</a></p>
     <div id="collapsibleDaysAllowedForm" class="collapse">
         <form action="" method="post" class="form-inline">
-            Number of days allowed:
+            <label for="days_allowed">Number of days allowed:</label>
             <input type="number" name="days_allowed" value="{{ days_allowed }}" id="days_allowed"
                    class="m-1 form-control">
             <input type="submit" value="submit" class="btn btn-primary">
@@ -21,10 +21,10 @@
     <p><a href="#collapsibleAddDateForm" data-toggle="collapse">Add</a> a date interval to the list:</p>
     <div id="collapsibleAddDateForm" class="collapse">
         <form action="" method="post" class="form-inline pl-4">
-            From
-            <input type="date" class="form-control m-1" name="interval-start">
-            to
-            <input type="date" class="form-control m-1" name="interval-end">
+            <label for="new-interval-start">From</label>
+            <input type="date" class="form-control m-1" name="interval-start" id="new-interval-start">
+            <label for="new-interval-end">to</label>
+            <input type="date" class="form-control m-1" name="interval-end" id="new-interval-end">
             <input type="submit" value="submit" class="btn btn-primary">
         </form>
     </div>
