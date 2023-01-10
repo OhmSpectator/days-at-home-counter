@@ -41,7 +41,7 @@ def _identify_user():
     g.user_id = escape(user_id)
 
 
-@app.route("/days-at-home", methods=['GET', 'POST'])
+@app.route("/", methods=['GET', 'POST'])
 def index():
     user_id = g.user_id
     days_allowed_str = request.form.get('days_allowed', None)
