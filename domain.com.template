@@ -7,6 +7,7 @@ server {
 
     location /days-at-home {
       rewrite ^/days-at-home/(.*)$ /$1 break;
+      rewrite ^/days-at-home$ / break;
       include uwsgi_params;
       uwsgi_pass unix:/var/www/days_at_home_counter/days-at-home-counter.sock;
     }
